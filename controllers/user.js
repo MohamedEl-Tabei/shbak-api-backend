@@ -41,7 +41,14 @@ const sendCode = async (req, res) => {
       to: email, // list of receivers
       subject: "Verify Email", // Subject line
       text: code, // plain text body
-      html: `<b>${code}</b>`, // html body
+      html: `
+      <div style="width:100%;">
+        <img style="height:30px" src="https://i.ibb.co/ZNjd3c1/Capture.png"/>
+        <div style="background-color:white;width:125px;display:flex;font-size:1.5rem">
+          <div style=" font-weight:bold;margin:auto">${code}</div>
+        </div>
+        <img style="height:30px" src="https://i.ibb.co/ZNjd3c1/Capture.png"/>
+      </div>`, // html body
     });
     let salt = await Package.bcrypt.genSalt(10);
     let hashCode = await Package.bcrypt.hash(code, salt);
