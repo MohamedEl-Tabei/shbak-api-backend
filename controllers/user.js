@@ -19,6 +19,30 @@ const signup = async (req, res) => {
     res.status(400).json(Err.getErrorMessage(error));
   }
 };
+const logIn = async (req, res) => {
+  try {
+    let email = req.body.email;
+    let password = req.body.password;
+    let time = req.body.rememberMe ? "12 days" : "1h";
+    let user = await Models.User.findOne({ email });
+    if (user && (await Package.bcrypt.compare(password, user.password))) {
+      if (!user.userAgent.includes(req.headers["user-agent"])) {
+        user.userAgent.push(req.headers["user-agent"]);
+        await user.save();
+      }
+      let token = await Package.jwt.sign(
+        { id: user.id },
+        process.env.SECRETKEY,
+        {
+          expiresIn: time,
+        }
+      );
+      res.status(200).json({ token, ...user._doc, password: undefined });
+    } else throw new Error(`Invalid email or password`);
+  } catch (error) {
+    res.status(400).json(Err.getErrorMessage(error));
+  }
+};
 const sendCode = async (req, res) => {
   try {
     const email = req.body.email.toLowerCase();
@@ -115,5 +139,6 @@ const controller = {
   emailIsUnique,
   deleteUser,
   phoneIsUnique,
+  logIn,
 };
 module.exports = controller;
